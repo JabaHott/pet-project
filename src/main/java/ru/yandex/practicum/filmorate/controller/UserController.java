@@ -41,7 +41,6 @@ public class UserController {
             validate(user);
             log.debug("Изменены данные по пользователю: {}", user.toString());
             users.put(user.getId(), user);
-            users.remove(user.getId());
             return user;
         } else {
             log.warn("Пользователь с id=" + user.getId() + " не найден");

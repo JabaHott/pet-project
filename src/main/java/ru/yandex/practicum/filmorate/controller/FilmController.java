@@ -40,7 +40,6 @@ public class FilmController {
         if (films.containsKey(film.getId())) {
             validate(film);
             log.debug("Обновлены данные по фильму: {}", film.toString());
-            films.remove(film.getId());
             films.put(film.getId(), film);
             return film;
         } else {
@@ -50,7 +49,7 @@ public class FilmController {
     }
 
     private void validate(Film film) {
-        if (!(film.getName().isEmpty())) {
+        if (!(film.getName().isBlank() || film.getName().equals(null))) {
             if (!(film.getDescription().length() > 200)) {
                 if (!(film.getReleaseDate().isBefore(localDate))) {
                     if (!(film.getDuration() < 0)) {
