@@ -60,7 +60,7 @@ public class FilmControllerTest {
 
     @Test
     public void oldFilmTest() throws Exception {
-        Film film = new Film("Name", "description", LocalDate.of(1980, 4, 1), 200);
+        Film film = new Film("Name", "description", LocalDate.of(1580, 4, 1), 200);
         try {
             mockMvc.perform(
                             post("/films")
