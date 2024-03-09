@@ -43,12 +43,12 @@ public class FilmController {
             films.put(film.getId(), film);
             return film;
         } else {
-            log.warn("Фильм с id=" + film.getId() + "не найден!");
+            log.error("Фильм с id=" + film.getId() + "не найден!");
             throw new FilmNotFoundException("Фильм с id=" + film.getId() + "не найден!");
         }
     }
 
-    private void validate(Film film) {
+    private void validate(Film film) throws FilmValidationException, FilmNotFoundException{
         if (!(film.getName().isBlank() || film.getName().equals(null))) {
             if (!(film.getDescription().length() > 200)) {
                 if (!(film.getReleaseDate().isBefore(localDate))) {
