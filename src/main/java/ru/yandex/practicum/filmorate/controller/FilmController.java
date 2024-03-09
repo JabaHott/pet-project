@@ -38,6 +38,7 @@ public class FilmController {
     @PutMapping("/films")
     public Film update(@Valid @RequestBody Film film) {
         if (films.containsKey(film.getId())) {
+            validate(film);
             log.debug("Обновлены данные по фильму: {}", film.toString());
             films.remove(film.getId());
             films.put(film.getId(), film);
