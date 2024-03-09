@@ -37,7 +37,7 @@ public class UserController {
 
     @PutMapping("/users")
     public User update(@Valid @RequestBody User user) {
-        if(users.containsKey(user.getId())){
+        if (users.containsKey(user.getId())) {
             log.debug("Изменены данные по пользователю: {}", user.toString());
             users.put(user.getId(), user);
             users.remove(user.getId());
