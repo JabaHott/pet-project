@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +19,9 @@ public class UserController {
     private Integer id = 1;
 
     @GetMapping("/users")
-    public Map<Integer, User> findAll() {
+    public Collection<User> findAll() {
         log.debug("Текущее количество пользователей: {}", users.size());
-        return users;
+        return users.values();
     }
 
     @PostMapping(value = "/users")

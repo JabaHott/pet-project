@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +19,9 @@ public class FilmController {
     LocalDate localDate = LocalDate.of(1985, 12, 28);
 
     @GetMapping("/films")
-    public Map<Integer, Film> findAll() {
+    public Collection<Film> findAll() {
         log.debug("Текущее количество фильмов: {}", films.size());
-        return films;
+        return films.values();
     }
 
     @PostMapping(value = "/films")
