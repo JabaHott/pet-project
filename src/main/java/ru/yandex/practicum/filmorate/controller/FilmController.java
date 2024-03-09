@@ -48,7 +48,7 @@ public class FilmController {
         }
     }
 
-    private void validate(Film film) throws FilmValidationException, FilmNotFoundException{
+    private void validate(Film film) throws FilmValidationException, FilmNotFoundException {
         if (!(film.getName().isBlank() || film.getName().equals(null))) {
             if (!(film.getDescription().length() > 200)) {
                 if (!(film.getReleaseDate().isBefore(localDate))) {
