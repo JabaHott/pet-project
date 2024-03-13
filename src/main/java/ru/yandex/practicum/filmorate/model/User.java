@@ -11,8 +11,8 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 public class User {
-    @Null(groups = UserControllerInterface.create.class)
-    @NotNull(groups = UserControllerInterface.update.class)
+    @Null(groups = UserControllerInterface.Create.class)
+    @NotNull(groups = UserControllerInterface.Update.class)
     private Integer id;
     @Email
     @NotBlank

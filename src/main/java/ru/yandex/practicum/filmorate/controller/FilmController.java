@@ -29,7 +29,7 @@ public class FilmController {
     }
 
     @PostMapping(value = "/films")
-    @Validated({FilmControllerInterface.create.class})
+    @Validated({FilmControllerInterface.Create.class})
     public Film create(@Valid @RequestBody Film film) {
         validate(film);
         film.setId(id);
@@ -40,7 +40,7 @@ public class FilmController {
     }
 
     @PutMapping("/films")
-    @Validated({FilmControllerInterface.update.class})
+    @Validated({FilmControllerInterface.Update.class})
     public Film update(@Valid @RequestBody Film film) {
         if (!(films.containsKey(film.getId()))) {
             log.error("Фильм с id=" + film.getId() + "не найден!");

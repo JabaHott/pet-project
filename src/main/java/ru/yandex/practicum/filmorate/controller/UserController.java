@@ -27,7 +27,7 @@ public class UserController implements UserControllerInterface {
     }
 
     @PostMapping(value = "/users")
-    @Validated({UserControllerInterface.create.class})
+    @Validated({Create.class})
     public User create(@Valid @RequestBody User user) {
         validate(user);
         user.setId(id);
@@ -38,7 +38,7 @@ public class UserController implements UserControllerInterface {
     }
 
     @PutMapping("/users")
-    @Validated({UserControllerInterface.update.class})
+    @Validated({Update.class})
     public User update(@Valid @RequestBody User user) {
         if (!(users.containsKey(user.getId()))) {
             log.warn("Пользователь с id=" + user.getId() + " не найден");

@@ -15,8 +15,8 @@ import java.time.LocalDate;
  */
 @Data
 public class Film {
-    @Null(groups = FilmControllerInterface.create.class)
-    @NotNull(groups = FilmControllerInterface.update.class)
+    @Null(groups = FilmControllerInterface.Create.class)
+    @NotNull(groups = FilmControllerInterface.Update.class)
     private Integer id;
     @NotBlank
     private String name;
