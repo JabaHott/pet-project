@@ -1,28 +1,28 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.practicum.filmorate.controller.UserControllerInterface;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 public class User {
+    @Null(groups = UserControllerInterface.create.class)
+    @NotNull(groups = UserControllerInterface.update.class)
     private Integer id;
     @Email
     @NotBlank
-    @NotNull
     private String email;
     @NotBlank
-    @NotNull
     private String login;
     private String name;
     @NotNull
     @PastOrPresent
+    @JsonFormat
     private LocalDate birthday;
 
     public User(String email, String login, String name, LocalDate birthday) {

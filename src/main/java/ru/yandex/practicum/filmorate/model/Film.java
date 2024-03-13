@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
+import ru.yandex.practicum.filmorate.controller.FilmControllerInterface;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 
@@ -12,12 +15,14 @@ import java.time.LocalDate;
  */
 @Data
 public class Film {
+    @Null(groups = FilmControllerInterface.create.class)
+    @NotNull(groups = FilmControllerInterface.update.class)
     private Integer id;
     @NotBlank
-    @NotNull
     private String name;
     private String description;
     @NotNull
+    @JsonFormat
     private LocalDate releaseDate;
     @Positive
     private Integer duration;

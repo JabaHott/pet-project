@@ -1,9 +1,10 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.customExceptions.UserNotFoundException;
-import ru.yandex.practicum.filmorate.customExceptions.UserValidationException;
+import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
@@ -14,7 +15,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
-public class UserController {
+public class UserController implements UserControllerInterface {
     private Map<Integer, User> users = new HashMap<>();
 
     private Integer id = 1;
@@ -26,6 +27,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/users")
+    @Validated({UserControllerInterface.create.class})
     public User create(@Valid @RequestBody User user) {
         validate(user);
         user.setId(id);
@@ -36,33 +38,33 @@ public class UserController {
     }
 
     @PutMapping("/users")
+    @Validated({UserControllerInterface.update.class})
     public User update(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            validate(user);
-            log.debug("Изменены данные по пользователю: {}", user.toString());
-            users.put(user.getId(), user);
-            return user;
-        } else {
+        if (!(users.containsKey(user.getId()))) {
             log.warn("Пользователь с id=" + user.getId() + " не найден");
-            throw new UserNotFoundException("Пользователь с id=" + user.getId() + " не найден");
+            throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
+        validate(user);
+        log.debug("Изменены данные по пользователю: {}", user.toString());
+        users.put(user.getId(), user);
+        return user;
     }
 
     private void validate(User user) {
-        if (!(user.getEmail().isEmpty() || !user.getEmail().contains("@"))) {
-            if (!(user.getLogin().isEmpty() || user.getLogin().contains(" "))) {
-                if (!(user.getBirthday().isAfter(LocalDate.now()))) {
-                    if (user.getName() == null || user.getName().isBlank()) {
-                        user.setName(user.getLogin());
-                    }
-                } else {
-                    throw new UserValidationException("Дата рождения не может быть в будущем");
-                }
-            } else {
-                throw new UserValidationException("Логин не должен быть пустой и не должен содержать пробелы");
-            }
-        } else {
-            throw new UserValidationException("Почта должна быть заполнена и содержать @.");
+        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
+            log.warn("Получена некорректная почта");
+            throw new ValidationException("Почта должна быть заполнена и содержать @.");
+        }
+        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            log.warn("Получен некорректный логин");
+            throw new ValidationException("Логин не должен быть пустой и не должен содержать пробелы");
+        }
+        if (user.getBirthday().isAfter(LocalDate.now())) {
+            log.warn("Получен пользователь с некорректной датой рождения");
+            throw new ValidationException("Дата рождения не может быть в будущем");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
     }
 }
