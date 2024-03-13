@@ -19,7 +19,7 @@ import java.util.Map;
 public class FilmController {
     private Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
-    private final int MAX_SIZE_DESCRIPTION = 200;
+    private static final int MAX_SIZE_DESCRIPTION = 200;
     private final LocalDate PAST_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping("/films")
