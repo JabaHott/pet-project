@@ -20,7 +20,7 @@ public class FilmController {
     private Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
     private static final int MAX_SIZE_DESCRIPTION = 200;
-    private final LocalDate PAST_DATE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate PAST_DATE = LocalDate.of(1895, 12, 28);
 
     @GetMapping("/films")
     public Collection<Film> findAll() {
