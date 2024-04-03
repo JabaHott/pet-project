@@ -4,20 +4,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import ru.yandex.practicum.filmorate.controller.FilmControllerInterface;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
-/**
- * Film.
- */
 @Data
 public class Film {
     @Null(groups = FilmControllerInterface.Create.class)
     @NotNull(groups = FilmControllerInterface.Update.class)
-    private Integer id;
+    private Long id;
     @NotBlank
     private String name;
     private String description;
@@ -26,11 +20,14 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private Integer duration;
+    @PositiveOrZero
+    private int rate;
 
-    public Film(String name, String description, LocalDate releaseDate, Integer duration) {
+    public Film(String name, String description, LocalDate releaseDate, Integer duration, int rate) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rate = rate;
     }
 }

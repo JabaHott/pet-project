@@ -36,7 +36,7 @@ public class FilmControllerTest {
 
     @Test
     public void emptyNameTest() throws Exception {
-        Film film = new Film(null, "description", LocalDate.of(1996, 4, 1), 200);
+        Film film = new Film(null, "description", LocalDate.of(1996, 4, 1), 200, 1);
         mockMvc.perform(
                         post("/films")
                                 .content(objectMapper.writeValueAsString(film))
@@ -46,7 +46,7 @@ public class FilmControllerTest {
 
     @Test
     public void bigDescTest() throws Exception {
-        Film film = new Film("name", "a".repeat(300), LocalDate.of(1996, 4, 1), 200);
+        Film film = new Film("name", "a".repeat(300), LocalDate.of(1996, 4, 1), 200, 2);
         try {
             mockMvc.perform(
                             post("/films")
@@ -60,7 +60,7 @@ public class FilmControllerTest {
 
     @Test
     public void oldFilmTest() throws Exception {
-        Film film = new Film("Name", "description", LocalDate.of(1580, 4, 1), 200);
+        Film film = new Film("Name", "description", LocalDate.of(1580, 4, 1), 200, 2);
         try {
             mockMvc.perform(
                             post("/films")
@@ -74,7 +74,7 @@ public class FilmControllerTest {
 
     @Test
     public void negDurationTest() throws Exception {
-        Film film = new Film("Name", "description", LocalDate.of(1996, 4, 1), -200);
+        Film film = new Film("Name", "description", LocalDate.of(1996, 4, 1), -200, 2);
         mockMvc.perform(
                         post("/films")
                                 .content(objectMapper.writeValueAsString(film))
@@ -84,7 +84,7 @@ public class FilmControllerTest {
 
     @Test
     public void allGoodTest() throws Exception {
-        Film film = new Film("Name", "description", LocalDate.of(1996, 4, 1), 200);
+        Film film = new Film("Name", "description", LocalDate.of(1996, 4, 1), 200, 2);
         mockMvc.perform(
                         post("/films")
                                 .content(objectMapper.writeValueAsString(film))
