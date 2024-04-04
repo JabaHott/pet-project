@@ -60,9 +60,10 @@ public class FilmService {
         Film film = get(filmId);
         log.debug("Пользователь {} поставил лайк фильму {}", user.getId(), film.getId());
         user.addLikedFilm(film.getId());
-        if (!user.getLikedFilms().contains(filmId)) {
+        if (user.getLikedFilms().contains(film.getId())) {
             film.setRate(film.getRate() + 1);
         }
+        filmStorage.update(film);
         return film.getId();
     }
 
@@ -83,6 +84,7 @@ public class FilmService {
 
     public List<Film> getMostPopular(int numberFilms) {
         return getAll().values().stream()
+                .sorted(Comparator.comparingLong(Film::getId))
                 .sorted(Comparator.comparingInt(Film::getRate).reversed())
                 .limit(numberFilms)
                 .collect(Collectors.toList());
