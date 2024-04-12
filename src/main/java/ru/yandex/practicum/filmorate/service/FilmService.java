@@ -11,19 +11,16 @@ import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.*;
 
 @Slf4j
 @Service
 public class FilmService {
-    private FilmStorage filmStorage;
-    private UserStorage userStorage;
     private static final int MAX_SIZE_DESCRIPTION = 200;
     private static final LocalDate PAST_DATE = LocalDate.of(1895, 12, 28);
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
@@ -34,14 +31,14 @@ public class FilmService {
     public Film create(Film film) {
         validate(film);
         filmStorage.create(film);
-        log.debug("Сохранен пользователь : {}", film.toString());
+        log.debug("Сохранен пользователь : {}", film);
         return film;
     }
 
     public Film update(Film film) {
         validate(film);
         filmStorage.update(film);
-        log.debug("Изменены данные по пользователю: {}", film.toString());
+        log.debug("Изменены данные по пользователю: {}", film);
         return film;
     }
 
@@ -50,17 +47,17 @@ public class FilmService {
         return filmStorage.get(id);
     }
 
-    public Map<Long, Film> getAll() {
+    public Collection<Film> getAll() {
         log.debug("Направлен запрос по всем пользователям");
         return filmStorage.getAll();
     }
 
     public Long addLike(Long filmId, Long userId) {
-        User user = userStorage.get(userId);
+        User user = userStorage.get(userId); // оставил для проверки есть пользователь или нет
         Film film = get(filmId);
-        log.debug("Пользователь {} поставил лайк фильму {}", user.getId(), film.getId());
-        user.addLikedFilm(film.getId());
-        if (user.getLikedFilms().contains(film.getId())) {
+        log.debug("Пользователь {} поставил лайк фильму {}", userId, film.getId());
+        film.addLike(userId);
+        if (film.getLikes().contains(userId)) {
             film.setRate(film.getRate() + 1);
         }
         filmStorage.update(film);
@@ -68,22 +65,18 @@ public class FilmService {
     }
 
     public Long removeLike(Long filmId, Long userId) {
-        User user = userStorage.get(userId);
+        User user = userStorage.get(userId); // оставил для проверки есть пользователь или нет
         Film film = get(filmId);
-        log.debug("Пользователь {} снял лайк с фильма {}", user.getId(), film.getId());
-        user.removeLikedFilm(filmId);
-        if (user.getLikedFilms().contains(filmId)) {
+        log.debug("Пользователь {} снял лайк с фильма {}", userId, film.getId());
+        film.removeLike(filmId);
+        if (film.getLikes().contains(userId)) {
             film.setRate(film.getRate() - 1);
         }
         return film.getId();
     }
 
-    public Set<Long> getLikes(Long userId) {
-        return userStorage.get(userId).getLikedFilms();
-    }
-
     public List<Film> getMostPopular(int numberFilms) {
-        return getAll().values().stream()
+        return getAll().stream()
                 .sorted(Comparator.comparingLong(Film::getId))
                 .sorted(Comparator.comparingInt(Film::getRate).reversed())
                 .limit(numberFilms)
@@ -91,10 +84,6 @@ public class FilmService {
     }
 
     private void validate(Film film) throws ValidationException, NotFoundException {
-        if ((film.getName().isBlank() || film.getName().equals(null))) {
-            log.warn("Получен фильм с пустым названием");
-            throw new ValidationException("Название должно быть заполнено");
-        }
         if (film.getDescription().length() > MAX_SIZE_DESCRIPTION) {
             log.warn("Размер описания превышен");
             throw new ValidationException("Описание не должно быть больше 200 символов");
@@ -102,10 +91,6 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(PAST_DATE)) {
             log.warn("Получен слишком старый фильм");
             throw new ValidationException("Дата выпуска должна быть после 28 декабря 1985 года.");
-        }
-        if (film.getDuration() < 0) {
-            log.warn("Получен фильм с отрицательной длительностью");
-            throw new ValidationException("Длительность фильма должна быть больше 0.");
         }
     }
 }

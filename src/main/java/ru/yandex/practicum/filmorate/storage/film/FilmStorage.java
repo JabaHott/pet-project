@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.Map;
+import java.util.Collection;
 
 public interface FilmStorage {
     Film create(Film film);
@@ -11,5 +11,5 @@ public interface FilmStorage {
 
     Film get(Long id);
 
-    Map<Long, Film> getAll();
+    Collection<Film> getAll();
 }

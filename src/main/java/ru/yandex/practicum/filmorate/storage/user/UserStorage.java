@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.Map;
+import java.util.Collection;
 
 public interface UserStorage {
     User create(User user);
@@ -11,5 +11,5 @@ public interface UserStorage {
 
     User get(Long id);
 
-    Map<Long, User> getAll();
+    Collection<User> getAll();
 }

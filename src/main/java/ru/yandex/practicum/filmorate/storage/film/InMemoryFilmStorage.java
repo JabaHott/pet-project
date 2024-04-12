@@ -4,42 +4,43 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
-    Map<Long, Film> filmMap = new HashMap<>();
-    private Long filmIdCounter = 1L;
+    private final Map<Long, Film> filmStorage = new HashMap<>();
+    private Long filmIdCounter = 0L;
 
 
     @Override
     public Film create(Film film) {
-        film.setId(filmIdCounter);
-        filmMap.put(filmIdCounter, film);
-        filmIdCounter++;
+        Long id = ++filmIdCounter;
+        film.setId(id);
+        filmStorage.put(id, film);
         return film;
     }
 
     @Override
     public Film update(Film film) {
-        if (!filmMap.containsKey(film.getId())) {
+        if (!filmStorage.containsKey(film.getId())) {
             throw new NotFoundException("Фильм с id=" + film.getId() + "не найден!");
         }
-        filmMap.put(film.getId(), film);
+        filmStorage.put(film.getId(), film);
         return film;
     }
 
     @Override
     public Film get(Long id) {
-        if (!filmMap.containsKey(id)) {
+        if (!filmStorage.containsKey(id)) {
             throw new NotFoundException("Фильм с id=" + id + "не найден!");
         }
-        return filmMap.get(id);
+        return filmStorage.get(id);
     }
 
     @Override
-    public Map<Long, Film> getAll() {
-        return filmMap;
+    public Collection<Film> getAll() {
+        return filmStorage.values();
     }
 }

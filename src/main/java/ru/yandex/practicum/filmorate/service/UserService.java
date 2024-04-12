@@ -7,16 +7,12 @@ import ru.yandex.practicum.filmorate.model.User;
 import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
 public class UserService {
-    private UserStorage userStorage;
+    private final UserStorage userStorage;
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -26,14 +22,14 @@ public class UserService {
     public User create(User user) {
         validate(user);
         userStorage.create(user);
-        log.debug("Сохранен пользователь : {}", user.toString());
+        log.debug("Сохранен пользователь : {}", user);
         return user;
     }
 
     public User update(User user) {
         validate(user);
         userStorage.update(user);
-        log.debug("Изменены данные по пользователю: {}", user.toString());
+        log.debug("Изменены данные по пользователю: {}", user);
         return user;
     }
 
@@ -42,7 +38,7 @@ public class UserService {
         return userStorage.get(id);
     }
 
-    public Map<Long, User> getAll() {
+    public Collection<User> getAll() {
         log.debug("Направлен запрос по всем пользователям");
         return userStorage.getAll();
     }
@@ -74,24 +70,6 @@ public class UserService {
     }
 
 
-    private void validate(User user) {
-        if (user.getEmail().isEmpty() || !user.getEmail().contains("@")) {
-            log.warn("Получена некорректная почта");
-            throw new ValidationException("Почта должна быть заполнена и содержать @.");
-        }
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.warn("Получен некорректный логин");
-            throw new ValidationException("Логин не должен быть пустой и не должен содержать пробелы");
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Получен пользователь с некорректной датой рождения");
-            throw new ValidationException("Дата рождения не может быть в будущем");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-    }
-
     public List<User> getCommonFriends(Long userId, Long otherUserId) {
         User user = userStorage.get(userId);
         User otherUser = userStorage.get(otherUserId);
@@ -102,5 +80,15 @@ public class UserService {
             commonFriendsList.add(userStorage.get(id));
         }
         return commonFriendsList;
+    }
+
+    private void validate(User user) {
+        if (user.getLogin().contains(" ")) {
+            log.warn("Получен некорректный логин");
+            throw new ValidationException("Логин не должен содержать пробелы");
+        }
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }

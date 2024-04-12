@@ -4,42 +4,43 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    Map<Long, User> userMap = new HashMap<>();
-    private Long userIdCounter = 1L;
+    private final Map<Long, User> userStorage = new HashMap<>();
+    private Long userIdCounter = 0L;
 
 
     @Override
     public User create(User user) {
-        user.setId(userIdCounter);
-        userMap.put(userIdCounter, user);
-        userIdCounter++;
+        Long id = ++userIdCounter;
+        user.setId(id);
+        userStorage.put(id, user);
         return user;
     }
 
     @Override
     public User update(User user) {
-        if (!userMap.containsKey(user.getId())) {
+        if (!userStorage.containsKey(user.getId())) {
             throw new NotFoundException("Пользователь с id=" + user.getId() + " не найден");
         }
-        userMap.put(user.getId(), user);
+        userStorage.put(user.getId(), user);
         return user;
     }
 
     @Override
     public User get(Long id) {
-        if (!userMap.containsKey(id)) {
+        if (!userStorage.containsKey(id)) {
             throw new NotFoundException("Пользователь с id=" + id + " не найден");
         }
-        return userMap.get(id);
+        return userStorage.get(id);
     }
 
     @Override
-    public Map<Long, User> getAll() {
-        return userMap;
+    public Collection<User> getAll() {
+        return userStorage.values();
     }
 }
