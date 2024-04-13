@@ -1,7 +1,7 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-![FILMORATE_ER_DIAGRAMM](/home/yura/Загрузки/Filmorate.png)
+![FILMORATE_ER_DIAGRAMM](/home/yura/IdeaProjects/java-filmorateFilmorate.png)
 
 
 Пример запроса по всем пользователям:
