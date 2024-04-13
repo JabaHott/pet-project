@@ -1,6 +1,15 @@
 # java-filmorate
 Template repository for Filmorate project.
 
+![FILMORATE_ER_DIAGRAMM](/home/yura/Загрузки/Filmorate.png)
+
+
+Пример запроса по всем пользователям:
+
+SELECT user_id
+FROM user
+
+
 # Работа по 9 спринту
 ## Реализовано
 * Film/User
