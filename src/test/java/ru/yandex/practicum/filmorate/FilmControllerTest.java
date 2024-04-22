@@ -33,7 +33,7 @@ public class FilmControllerTest {
     private static final Integer FILM_DURATION = 90;
     private static final LocalDate RELEASE_DATE = LocalDate.of(2001, 10, 31);
     private static final Integer RATE = 10;
-    private static final Mpa mpa = new Mpa(2l, "PG");
+    private static final Mpa mpa = new Mpa(2L, "PG");
 
     static {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
