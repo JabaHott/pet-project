@@ -123,6 +123,7 @@ public class FilmDbStorage implements FilmStorage {
         userStorage.get(userId);
         String sqlQuery = "INSERT INTO FILM_LIKE(FILM_ID, USER_ID) VALUES(?,?)";
         jdbcTemplate.update(sqlQuery, filmId, userId);
+        get(filmId).setRate(get(filmId).getRate() + 1);
         return filmId;
     }
 
@@ -132,6 +133,7 @@ public class FilmDbStorage implements FilmStorage {
         User user = userStorage.get(userId);
         String sqlQuery = "DELETE FROM PUBLIC.FILM_LIKE WHERE FILM_ID=? AND USER_ID=?;";
         jdbcTemplate.update(sqlQuery, filmId, userId);
+        get(filmId).setRate(get(filmId).getRate() - 1);
         return filmId;
     }
 
