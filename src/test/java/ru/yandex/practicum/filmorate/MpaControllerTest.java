@@ -26,7 +26,7 @@ public class MpaControllerTest {
 
     @Test
     public void findById() {
-        Mpa mpa = mpaService.getMpaById(1l);
+        Mpa mpa = mpaService.getMpaById(1L);
         assertEquals("G", mpa.getName());
     }
 }

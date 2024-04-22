@@ -26,7 +26,7 @@ public class GenreControllerTest {
 
     @Test
     public void findById() {
-        Genre genre = genreService.getGenreById(1l);
+        Genre genre = genreService.getGenreById(1L);
         assertEquals("Комедия", genre.getName());
     }
 }
