@@ -61,7 +61,7 @@ public class FilmService {
 
     public List<Film> getMostPopular(int numberFilms) {
         return filmStorage.getAll().stream()
-                .sorted((f1, f2) -> f2.getRate() - f1.getRate())
+                .sorted((f1, f2) -> f1.getRate() - f2.getRate())
                 .limit(numberFilms)
                 .collect(Collectors.toList());
     }
