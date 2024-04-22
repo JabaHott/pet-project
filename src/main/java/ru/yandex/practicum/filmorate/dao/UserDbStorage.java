@@ -84,6 +84,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Long addFriend(Long userId, Long friendId) {
+        get(userId);
+        get(friendId);
         String sqlQuery = "INSERT INTO PUBLIC.FRIEND (FRIEND_USER_ID, FRIEND_FRIEND_ID, STATUS) VALUES(?,?,?);";
         if (isFriends(userId, friendId)) {
             String sqlQueryForFriends = "UPDATE PUBLIC.FRIEND SET STATUS=? WHERE FRIEND_USER_ID=? AND FRIEND_FRIEND_ID=?;";
@@ -97,6 +99,8 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Long removeFriend(Long userId, Long friendId) {
+        get(friendId);
+        get(userId);
         String sqlQuery = "DELETE FROM PUBLIC.FRIEND WHERE FRIEND_USER_ID=? AND FRIEND_FRIEND_ID=?;";
         if (isFriends(userId, friendId)) {
             String sqlQueryIfApproved = "UPDATE PUBLIC.FRIEND SET STATUS=? WHERE FRIEND_USER_ID=? AND FRIEND_FRIEND_ID=?";
@@ -108,12 +112,15 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(Long userId) {
+        get(userId);
         String sqlQuery = "SELECT * FROM \"USER\" AS U WHERE U.USER_ID IN(SELECT FRIEND_FRIEND_ID FROM PUBLIC.FRIEND WHERE FRIEND_USER_ID = ?);";
         return jdbcTemplate.query(sqlQuery, this::mapRowToUser, userId);
     }
 
     @Override
     public List<User> getCommonFriends(Long userId, Long otherUserId) {
+        get(userId);
+        get(otherUserId);
         String sqlQuery = "SELECT * FROM \"USER\" AS U \n" +
                 "WHERE U.USER_ID IN \n" +
                 "(SELECT F.FRIEND_FRIEND_ID\n" +
