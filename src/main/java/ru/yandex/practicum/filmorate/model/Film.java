@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@Builder
 public class Film {
     @Null(groups = FilmControllerInterface.Create.class)
     @NotNull(groups = FilmControllerInterface.Update.class)
@@ -25,20 +26,11 @@ public class Film {
     private Integer duration;
     @PositiveOrZero
     private int rate;
+    @NotNull
+    private Mpa mpa;
     @JsonIgnore
-    private Set<Long> likes;
-
-    public Film(String name, String description, LocalDate releaseDate, Integer duration, int rate) {
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.rate = rate;
-    }
-
-    public Film() {
-        this.likes = new HashSet<>();
-    }
+    private final Set<Long> likes = new HashSet<>();
+    private final Set<Genre> genres = new HashSet<>();
 
     public void addLike(Long id) {
         likes.add(id);
