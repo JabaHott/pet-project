@@ -29,7 +29,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void ValidUser() {
+    public void validUser() {
         User user = User.builder()
                 .login("SmokeMaster")
                 .name("Daite_pokurit")
@@ -74,7 +74,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void NotValidEmail() {
+    public void notValidEmail() {
         User user = User.builder()
                 .login("SmokeMaster")
                 .name("Daite_pokurit")
@@ -191,7 +191,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void AllFriend() {
+    public void allFriend() {
         User user = User.builder()
                 .login("SmokeMaster")
                 .name("Daite_pokurit")
