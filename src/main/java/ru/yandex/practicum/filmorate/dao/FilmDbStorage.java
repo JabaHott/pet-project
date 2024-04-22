@@ -130,7 +130,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Long removeLike(Long filmId, Long userId) {
         Film film1 = get(filmId);
-        User user = userStorage.get(userId);
+        User user1 = userStorage.get(userId);
         String sqlQuery = "DELETE FROM PUBLIC.FILM_LIKE WHERE FILM_ID=? AND USER_ID=?;";
         jdbcTemplate.update(sqlQuery, filmId, userId);
         get(filmId).setRate(get(filmId).getRate() - 1);
