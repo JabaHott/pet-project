@@ -44,3 +44,4 @@ public class MpaDbStorage implements MpaStorage {
         return new Mpa(rs.getLong("MPA_ID"), rs.getString("MPA_NAME"));
     }
 }
+

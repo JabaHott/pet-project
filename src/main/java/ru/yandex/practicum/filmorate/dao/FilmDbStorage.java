@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -116,30 +115,31 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Long addLike(Long filmId, Long userId) {
-        if (!exists(filmId)) {
-            log.warn("Фильм с id = {} не найден", filmId);
-            throw new NotFoundException("Фильм с id =" + filmId);
+        if (!likeExist(filmId, userId)) {
+            String sqlQuery = "INSERT INTO FILM_LIKE(FILM_ID, USER_ID) VALUES(?,?)";
+            jdbcTemplate.update(sqlQuery, filmId, userId);
         }
-        userStorage.get(userId);
-        String sqlQuery = "INSERT INTO FILM_LIKE(FILM_ID, USER_ID) VALUES(?,?)";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
-        get(filmId).setRate(get(filmId).getRate() + 1);
+
         return filmId;
     }
 
     @Override
     public Long removeLike(Long filmId, Long userId) {
         Film film1 = get(filmId);
-        User user1 = userStorage.get(userId);
         String sqlQuery = "DELETE FROM PUBLIC.FILM_LIKE WHERE FILM_ID=? AND USER_ID=?;";
         jdbcTemplate.update(sqlQuery, filmId, userId);
-        get(filmId).setRate(get(filmId).getRate() - 1);
         return filmId;
     }
 
     public boolean exists(Long id) {
         String sqlQuery = "select count(*) from FILM where FILM_ID = ?";
         int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, id);
+        return result == 1;
+    }
+
+    public boolean likeExist(Long filmId, Long userId) {
+        String sqlQuery = "select count(*) from FILM_LIKE where FILM_ID = ? AND USER_ID = ?";
+        int result = jdbcTemplate.queryForObject(sqlQuery, Integer.class, filmId, userId);
         return result == 1;
     }
 

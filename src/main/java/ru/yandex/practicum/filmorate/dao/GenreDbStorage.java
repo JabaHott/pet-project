@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
@@ -29,15 +30,21 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(Long id) {
-        String sqlQuery = "SELECT GENRE_ID, GENRE_NAME FROM PUBLIC.GENRE WHERE GENRE_ID = ?;";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
-        if (genreRows.next()) {
-            Genre genre = new Genre(genreRows.getLong("GENRE_ID"), genreRows.getString("GENRE_NAME"));
-            log.info("Найдет жанр с id = {}", id);
-            return genre;
+        String sqlQuery1 = "SELECT count(*) FROM PUBLIC.GENRE WHERE GENRE_ID = ?;";
+        int result = jdbcTemplate.queryForObject(sqlQuery1, Integer.class, id);
+        if (!(id < result)) {
+            String sqlQuery = "SELECT GENRE_ID, GENRE_NAME FROM PUBLIC.GENRE WHERE GENRE_ID = ?;";
+            SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
+            if (genreRows.next()) {
+                Genre genre = new Genre(genreRows.getLong("GENRE_ID"), genreRows.getString("GENRE_NAME"));
+                log.info("Найдет жанр с id = {}", id);
+                return genre;
+            }
+            log.warn("Не найден жанр с id = {}", id);
+            throw new NotFoundException("Жанр с id" + id + "не найден!");
+        } else {
+            throw new ValidationException("Запрошен не существующий жанр");
         }
-        log.warn("Не найден жанр с id = {}", id);
-        throw new NotFoundException("Жанр с id" + id + "не найден!");
     }
 
     private Genre mapRowToGenre(ResultSet rs, int rowNum) throws SQLException {
