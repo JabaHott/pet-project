@@ -15,10 +15,7 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Collection;
 import java.util.List;
 
@@ -52,9 +49,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKey().longValue());
         ;
         if (!film.getGenres().isEmpty()) {
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(sqlQueryForGenre, film.getId(), genre.getId());
-            }
+            genreTackle(film, sqlQueryForGenre);
         }
         return film;
     }
@@ -94,13 +89,11 @@ public class FilmDbStorage implements FilmStorage {
         }
         String sqlQuery = "UPDATE PUBLIC.FILM SET NAME=?, DESCRIPTION=?, RELEASE_DATE=?, DURATION=?, RATING=?, MPA_ID=? WHERE FILM_ID=?;";
         String sqlQueryForDelete = "DELETE FROM PUBLIC.FILM_GENRE WHERE FILM_ID=?;";
-        String sqlQueryForFilmGenre = "UPDATE PUBLIC.FILM_GENRE SET WHERE FILM_ID=? AND GENRE_ID=?;";
+        String sqlQueryForUpdGenre = "UPDATE PUBLIC.FILM_GENRE SET WHERE FILM_ID=? AND GENRE_ID=?;";
         jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
         jdbcTemplate.update(sqlQueryForDelete, film.getId());
         if (!film.getGenres().isEmpty()) {
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(sqlQueryForFilmGenre, film.getId(), genre.getId());
-            }
+            genreTackle(film, sqlQueryForUpdGenre);
         }
         film.getGenres().clear();
         film.getGenres().addAll(mapRowToFilmGenre(film.getId()));
@@ -176,5 +169,11 @@ public class FilmDbStorage implements FilmStorage {
         film.getGenres().addAll(filmGenres);
         film.getLikes().addAll(filmLikes);
         return film;
+    }
+
+    private void genreTackle(Film film, String sqlQuery) {
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(sqlQuery, film.getId(), genre.getId());
+        }
     }
 }
