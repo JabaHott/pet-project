@@ -2,13 +2,14 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.customExceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -20,12 +21,12 @@ public class FilmService {
     private static final int MAX_SIZE_DESCRIPTION = 200;
     private static final LocalDate PAST_DATE = LocalDate.of(1895, 12, 28);
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
+    private final GenreStorage genreStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, GenreStorage genreStorage) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
+        this.genreStorage = genreStorage;
     }
 
     public Film create(Film film) {
@@ -53,32 +54,19 @@ public class FilmService {
     }
 
     public Long addLike(Long filmId, Long userId) {
-        User user = userStorage.get(userId); // оставил для проверки есть пользователь или нет
-        Film film = get(filmId);
-        log.debug("Пользователь {} поставил лайк фильму {}", userId, film.getId());
-        film.addLike(userId);
-        if (film.getLikes().contains(userId)) {
-            film.setRate(film.getRate() + 1);
-        }
-        filmStorage.update(film);
-        return film.getId();
+        filmStorage.addLike(filmId, userId);
+        return filmId;
     }
 
     public Long removeLike(Long filmId, Long userId) {
-        User user = userStorage.get(userId); // оставил для проверки есть пользователь или нет
-        Film film = get(filmId);
-        log.debug("Пользователь {} снял лайк с фильма {}", userId, film.getId());
-        film.removeLike(filmId);
-        if (film.getLikes().contains(userId)) {
-            film.setRate(film.getRate() - 1);
-        }
-        return film.getId();
+        filmStorage.removeLike(filmId, userId);
+        return filmId;
     }
 
     public List<Film> getMostPopular(int numberFilms) {
-        return getAll().stream()
+        return filmStorage.getAll().stream()
                 .sorted(Comparator.comparingLong(Film::getId))
-                .sorted(Comparator.comparingInt(Film::getRate).reversed())
+                .sorted((f1, f2) -> f2.getLikes().size() - f1.getLikes().size())
                 .limit(numberFilms)
                 .collect(Collectors.toList());
     }
@@ -91,6 +79,17 @@ public class FilmService {
         if (film.getReleaseDate().isBefore(PAST_DATE)) {
             log.warn("Получен слишком старый фильм");
             throw new ValidationException("Дата выпуска должна быть после 28 декабря 1985 года.");
+        }
+        if (film.getMpa().getId() > 7) {
+            log.warn("Получен некорректный Mpa");
+            throw new ValidationException("Получен некорректный Mpa");
+        }
+        if (!film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                if (genre.getId() > 7) {
+                    throw new ValidationException("XUI");
+                }
+            }
         }
     }
 }

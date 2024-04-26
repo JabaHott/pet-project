@@ -1,124 +1,221 @@
 package ru.yandex.practicum.filmorate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.customExceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
-
+import javax.validation.*;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.Assert.*;
 
-@WebMvcTest
-@AutoConfigureWebMvc
-@ContextConfiguration(classes = {FilmController.class, FilmService.class, InMemoryFilmStorage.class,
-        UserController.class, UserService.class, InMemoryUserStorage.class})
+@SpringBootTest
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserControllerTest {
-    @Autowired
-    private MockMvc mockMvc;
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final UserService userService;
+    private static final Validator validator;
 
-    @Test
-    public void emptyUserBodyTest() throws Exception {
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString("{}"))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    static {
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.usingContext().getValidator();
     }
 
     @Test
-    public void validUserTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2000, 4, 14);
-        User user = new User("yura@mail.ru", "baiden_loh", "Russkii", birthday);
-        mockMvc.perform(post("/users")
-                        .content(objectMapper.writeValueAsString(user))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
+    public void validUser() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        assertTrue(userService.getAll().contains(user));
     }
 
     @Test
-    public void invalidEmailNoDogTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2000, 4, 14);
-        User user = new User("yura", "baiden_loh", "Russkii", birthday);
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString(user))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void updUser() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        User user1 = User.builder()
+                .id(user.getId())
+                .login("SmokeMaster1")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.update(user1);
+        assertTrue(userService.getAll().contains(user1));
+        assertFalse(userService.getAll().contains(user));
     }
 
     @Test
-    public void emptyEmailTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2000, 4, 14);
-        User user = new User(null, "baiden_loh", "Russkii", birthday);
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString(user))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void emptName() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        assertEquals("SmokeMaster", user.getName());
     }
 
     @Test
-    public void loginWhiteSpacesTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2000, 4, 14);
-        User user = new User("yura@mail.ru", "baiden loh", "Russkii", birthday);
-        try {
-            mockMvc.perform(
-                    post("/users")
-                            .content(objectMapper.writeValueAsString(user))
-                            .contentType(MediaType.APPLICATION_JSON));
-        } catch (Exception ue) {
-            assertEquals("Логин не должен быть пустой и не должен содержать пробелы", ue.getMessage().substring(119));
-        } // как это лучше проверить не знаю. По идее нужно что-то, что будет обрабатывать ошибки и выбрасывать как validate, но я не смог разобраться что
+    public void notValidEmail() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertEquals(1, violations.size());
     }
 
     @Test
-    public void emptyLoginTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2000, 4, 14);
-        User user = new User("yura@mail.ru", null, "Russkii", birthday);
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString(user))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void emptLogin() {
+        User user = User.builder()
+                .login("")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertEquals(1, violations.size());
     }
 
     @Test
-    public void futureBirthdayTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2026, 4, 14);
-        User user = new User("yura@mail.ru", "baiden_loh", "Russkii", birthday);
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString(user))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+    public void blankLogin() {
+        User user = User.builder()
+                .login(" ")
+                .name("123ll")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        assertThrows(ValidationException.class, () -> {
+            userService.create(user);
+        });
     }
 
     @Test
-    public void emptyNameTest() throws Exception {
-        LocalDate birthday = LocalDate.of(2001, 4, 14);
-        User user = new User("yura@mail.ru", "baiden_loh", "", birthday);
-        mockMvc.perform(
-                        post("/users")
-                                .content(objectMapper.writeValueAsString(user))
-                                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+    public void futureUser() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(3001, 4, 14))
+                .build();
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertEquals(1, violations.size());
+    }
+
+    @Test
+    public void addFriend() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        User user1 = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user1);
+        userService.addFriend(user.getId(), user1.getId());
+    }
+
+    @Test
+    public void deleteFriend() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        User user1 = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user1);
+        userService.addFriend(user.getId(), user1.getId());
+        userService.removeFriend(user.getId(), user1.getId());
+    }
+
+    @Test
+    public void commonFriend() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        User friend = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(friend);
+        User mutualFriend = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(mutualFriend);
+        userService.addFriend(user.getId(), mutualFriend.getId());
+        userService.addFriend(friend.getId(), mutualFriend.getId());
+        List<User> mutual = userService.getCommonFriends(user.getId(), friend.getId());
+        assertEquals(List.of(mutualFriend), mutual);
+    }
+
+    @Test
+    public void allFriend() {
+        User user = User.builder()
+                .login("SmokeMaster")
+                .name("Daite_pokurit")
+                .email("qwertyuiopasd@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(user);
+        User friend = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(friend);
+        User mutualFriend = User.builder()
+                .login("SmokeMaster1")
+                .name("Daite_pokurit1")
+                .email("qwertyuiopasd1@yandex.ru")
+                .birthday(LocalDate.of(2001, 4, 14))
+                .build();
+        userService.create(mutualFriend);
+        userService.addFriend(user.getId(), friend.getId());
+        userService.addFriend(user.getId(), mutualFriend.getId());
+        List<User> all = userService.getFriends(user.getId());
+        assertEquals(List.of(friend, mutualFriend), all);
     }
 }

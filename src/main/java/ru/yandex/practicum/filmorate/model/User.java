@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.controller.UserControllerInterface;
 
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@Builder
 public class User {
     @Null(groups = UserControllerInterface.Create.class)
     @NotNull(groups = UserControllerInterface.Update.class)
@@ -27,19 +29,7 @@ public class User {
     private LocalDate birthday;
     @NotNull(groups = UserControllerInterface.Create.class)
     @JsonIgnore
-    private Set<Long> friendsSet;
-
-    public User(String email, String login, String name, LocalDate birthday) {
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-        this.friendsSet = new HashSet<>();
-    }
-
-    public User() {
-        this.friendsSet = new HashSet<>();
-    }
+    private final Set<Long> friendsSet = new HashSet<>();
 
     public void addFriend(Long friendId) {
         friendsSet.add(friendId);
